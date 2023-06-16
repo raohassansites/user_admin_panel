@@ -1,12 +1,12 @@
 <?php
 require('connection.inc.php');
 require('functions.inc.php');
-if(isset($_SESSION['ADMIN_LOGIN']) && $_SESSION['ADMIN_LOGIN']!=''){
+// if(isset($_SESSION['ADMIN_LOGIN']) && $_SESSION['ADMIN_LOGIN']!=''){
 
-}else{
-   header('location:login.php');
-   die();
-}
+// }else{
+//    header('location:login.php');
+//    die();
+// }
 
 ?>
 
@@ -34,26 +34,39 @@ if(isset($_SESSION['ADMIN_LOGIN']) && $_SESSION['ADMIN_LOGIN']!=''){
             <div id="main-menu" class="main-menu collapse navbar-collapse">
                <ul class="nav navbar-nav">
                   <li class="menu-title">MENU</li>
-                  <?php if($_SESSION['ADMIN_ROLE']!=1){?>
-				   <li class="menu-item-has-children dropdown">
+                  <?php 
+                  if (isset($_SESSION['ADMIN_ROLE']) && $_SESSION['ADMIN_ROLE']==1) {?>
+                    
+                    
+                  <li class="menu-item-has-children dropdown">
+                     <a href="cart.php" > My Cart </a>
+                  </li>
+                  <?php } elseif (isset($_SESSION['ADMIN_ROLE']) && $_SESSION['ADMIN_ROLE']==0) {?>
+
+                     
+                     <li class="menu-item-has-children dropdown">
                      <a href="vendor_management.php" > User Management </a>
                   </li>
                   <li class="menu-item-has-children dropdown">
                      <a href="user_dashboard.php" > Add Product</a>
                   </li>
                   <li class="menu-item-has-children dropdown">
+                     <a href="sp1.php" > Product List </a>
+                  </li>
+                  <li class="menu-item-has-children dropdown">
                      <a href="manage_vendor_management.php" > Add Admin</a>
                   </li>
-				  <?php }  else {?>
-             
-               <li class="menu-item-has-children dropdown">
-                     <a href="show_products.php" > Product List </a>
+                  <li class="menu-item-has-children dropdown">
+                     <a href="invoice.php" > Invoices</a>
                   </li>
+                   <?php } else {?>
+                     
+                     
                   <li class="menu-item-has-children dropdown">
                      <a href="cart.php" > My Cart </a>
                   </li>
-             <?php }
-              ?>
+                   <?php ;};?>
+                
                </ul>
             </div>
          </nav>
@@ -70,9 +83,30 @@ if(isset($_SESSION['ADMIN_LOGIN']) && $_SESSION['ADMIN_LOGIN']!=''){
             <div class="top-right">
                <div class="header-menu">
                   <div class="user-area dropdown float-right">
-                     <a href="#" class="dropdown-toggle active" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">WELCOME <?php echo $_SESSION['ADMIN_USERNAME']?></a>
+                     <a href="#" class="dropdown-toggle active" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">  
+                     <?php 
+				  if (isset($_SESSION['ADMIN_USERNAME']) && $_SESSION['ADMIN_USERNAME']!='') {
+					echo $_SESSION["ADMIN_USERNAME"];
+					
+				  } else {
+					echo 'Customer';
+				  };
+				  
+				   
+				  
+				  ?></a>
                      <div class="user-menu dropdown-menu">
-                        <a class="nav-link" href="logout.php"><i class="fa fa-power-off"></i>LOGOUT</a>
+                        <?php
+                         if (isset($_SESSION['ADMIN_LOGIN']) && $_SESSION['ADMIN_LOGIN']!='') {?>
+                              <a class="nav-link" href="logout.php"><i class="fa fa-power-off"></i>LOGOUT</a>
+                              
+                              <?php 
+                           
+                          } else {?>
+                           <a class="nav-link" href="login.php"><i class="fa fa-power-off"></i>LOGIN/REGISTER</a>
+                           <?php };
+                        ?>
+                        
                      </div>
                   </div>
                </div>

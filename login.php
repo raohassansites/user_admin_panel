@@ -3,7 +3,8 @@ require('connection.inc.php');
 require('functions.inc.php');
 $msg='';
 if(isset($_POST['submit'])){
-	$username=get_safe_value($con,$_POST['username']);
+   
+	$username=get_safe_value($con ,$_POST['username']);
 	$password=get_safe_value($con,$_POST['password']);
 	$sql="select * from admin_users where username='$username' and password='$password'";
 	$res=mysqli_query($con,$sql);

@@ -2,9 +2,10 @@
 <?php
 require('top.inc.php');
 $product_name='';
+$product_img='';
+$category='';
 $desc='';
 $price='';
-
 $msg='';
 if(isset($_GET['id']) && $_GET['id']!=''){
 	$image_required='';
@@ -14,6 +15,8 @@ if(isset($_GET['id']) && $_GET['id']!=''){
 	if($check>0){
 		$row=mysqli_fetch_assoc($res);
 		$product_name=$row['product_name'];
+		$product_img=$row['product_img'];
+		$category=$row['category'];
 		$desc=$row['desc'];
 		$price=$row['price'];
 	}else{
@@ -22,7 +25,22 @@ if(isset($_GET['id']) && $_GET['id']!=''){
 	}
 }
 if(isset($_POST['submit'])){
+	$product_img = $_FILES["uploadfile"]["name"];
+    $tempname = $_FILES["uploadfile"]["tmp_name"];
+    $folder = "./uploads/" . $product_img;
+ 
+ 
+    // Get all the submitted data from the form
+    $sql = "INSERT INTO product_list (product_img) VALUES ('$product_img')";
+
+
+	move_uploaded_file($tempname, $folder);
+
+        
+    
+
 	$product_name=get_safe_value($con,$_POST['product_name']);
+	$category=get_safe_value($con,$_POST['category']);
 	$desc=get_safe_value($con,$_POST['desc']);
 	$price=get_safe_value($con,$_POST['price']);
 	
@@ -31,8 +49,9 @@ if(isset($_POST['submit'])){
 	if($check>0){
 		if(isset($_GET['id']) && $_GET['id']!=''){
 			$getData=mysqli_fetch_assoc($res);
+			$ress=mysqli_query($con, $sql);
 			if($id==$getData['id']){
-			
+			  
 			}else{
 				$msg="Product already exist";
 			}
@@ -41,20 +60,21 @@ if(isset($_POST['submit'])){
 		}
 	}
 	
-	
 	if($msg==''){
-		if(isset($_GET['id']) && $_GET['id']!=''){
-			$update_sql="update product_list set product_name='$product_name', desc='$desc', price='$price' where id='$id' ";
+		if(isset($_GET['product_name']) && $_GET['product_name']!=''){
+			$update_sql="update product_list set product_name='$product_name', product_img='$product_img' , category='$category', desc='$desc', price='$price' where id='$id' ";
 			mysqli_query($con,$update_sql);
 		}else{
-			mysqli_query($con,"insert into product_list(`product_name`, `desc`, `price`) values ('$product_name','$desc','$price')");
+			mysqli_query($con,"insert into product_list(`product_name`, `product_img` , `category` , `desc`, `price`) values ('$product_name','$product_img','$category','$desc','$price')");
 		}
 		header('location:user_dashboard.php');
 		die();
 	}
+	
 }
 
 ?>
+
 <div class="content pb-0">
             <div class="animated fadeIn">
                <div class="row">
@@ -70,6 +90,10 @@ if(isset($_POST['submit'])){
 									<input type="text" name="product_name" placeholder="Enter product name" class="form-control" required value="<?php echo $product_name?>">
 								</div>
 								<div class="form-group">
+									<label for="categories" class=" form-control-label">CATEGORY</label>
+									<input type="text" name="category" placeholder="Enter category " class="form-control" required value="<?php echo $category?>">
+								</div>
+								<div class="form-group">
 									<label for="categories" class=" form-control-label">Description</label>
 									<input type="text"   step="any" name="desc" placeholder="Enter quantity" class="form-control" required value="<?php echo $desc?>">
 								</div>
@@ -79,13 +103,14 @@ if(isset($_POST['submit'])){
 									<input type="number" min="1"  name="price" placeholder="Enter price" class="form-control" required value="<?php echo $price?>">
 								</div>
 								
-								
-							   <button id="payment-button" name="submit" type="submit" class="btn btn-lg btn-info btn-block">
+								<input class="form-control" type="file" name="uploadfile" value="" />
+															   <button id="payment-button" name="submit" type="submit" class="btn btn-lg btn-info btn-block">
 							   <span id="payment-button-amount">ADD</span>
 							   </button>
 							   <div class="field_error"><?php echo $msg?></div>
 							</div>
 						</form>
+						
                      </div>
                   </div>
                </div>

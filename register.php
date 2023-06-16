@@ -5,7 +5,6 @@ $username='';
 $password='';
 $email='';
 $mobile='';
-
 $msg='';
 if(isset($_GET['id']) && $_GET['id']!=''){
 	$image_required='';
@@ -23,10 +22,10 @@ if(isset($_GET['id']) && $_GET['id']!=''){
 		die();
 	}
 }
-function get_safe_value($con,$str){
+function get_safe_value($db,$str){
 	if($str!=''){
 		$str=trim($str);
-		return mysqli_real_escape_string($con,$str);
+		return mysqli_real_escape_string($db,$str);
 	}
 }
 

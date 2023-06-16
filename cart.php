@@ -1,12 +1,48 @@
 <?php
 require('top.inc.php');
 $status="";
-if (isset($_POST['action']) && $_POST['action']=="remove"){
-if(!empty($_SESSION["shopping_cart"])) {
-	foreach($_SESSION["shopping_cart"] as $key => $value) {
-		if($_POST["product_name"] == $key){
-		unset($_SESSION["shopping_cart"][$key]);
-		$status = "<div class=' mx-3 alert alert-danger alert-dismissible fade show' role='alert'>
+
+
+
+if (empty($_SESSION["shopping_cart"]) ) {
+
+} else {
+	
+
+$items_data=json_encode($_SESSION["shopping_cart"],true);
+setcookie("items",$items_data,time() + 60*100000, '/');
+$items=json_decode($_COOKIE["items"],true);
+// echo var_dump($items);
+// if (isset($_POST['action']) && $_POST['action']=="remove"){
+// if(!empty($_SESSION["shopping_cart"])) {
+// 	foreach($_SESSION["shopping_cart"] as $key => $value) {
+// 		if($_POST["remove"] == $key){
+			
+// 		unset($_SESSION["shopping_cart"][$key]);
+// 		$status = "<div class=' mx-3 alert alert-danger alert-dismissible fade show' role='alert'>
+	
+// 		<div class='box' style='color:red;'>
+// 				<strong>Product</strong> is removed from your cart!</div>
+// 		  <button type='button' class='close' data-dismiss='alert' aria-label='Close'>
+// 			<span aria-hidden='true'>&times;</span>
+// 		  </button>
+// 		</div>";
+// 		}
+// 		if(empty($_SESSION["shopping_cart"]))
+// 		unset($_SESSION["shopping_cart"]);
+// 			}		
+// 		}
+// }
+if(isset($_GET["action"]))
+{
+	if($_GET["action"] == "delete")
+	{
+		foreach($_SESSION["shopping_cart"] as $key => $values)
+		{
+			if($values["p_id"] == $_GET["id"])
+			{
+				unset($_SESSION["shopping_cart"][$key]);
+				$status = "<div class=' mx-3 alert alert-danger alert-dismissible fade show' role='alert'>
 	
 		<div class='box' style='color:red;'>
 				<strong>Product</strong> is removed from your cart!</div>
@@ -14,21 +50,24 @@ if(!empty($_SESSION["shopping_cart"])) {
 			<span aria-hidden='true'>&times;</span>
 		  </button>
 		</div>";
-		}
-		if(empty($_SESSION["shopping_cart"]))
+			}
+				{	if(empty($_SESSION["shopping_cart"]))
 		unset($_SESSION["shopping_cart"]);
 			}		
+
 		}
+	}
 }
 if (isset($_POST['action']) && $_POST['action']=="change"){
   foreach($_SESSION["shopping_cart"] as &$value){
-    if($value['product_name'] === $_POST["product_name"]){
+	 echo var_dump($value);
+    if($value['p_id'] === $_POST["p_id"]){
         $value['quantity'] = $_POST["quantity"];
         break; // Stop the loop after we've found the product
     }
 }
   	
-}
+}}
 ?>
 
 <div style="padding:0px 100px;">
@@ -37,51 +76,49 @@ if (isset($_POST['action']) && $_POST['action']=="change"){
 <div class="message_box" style="margin:10px 0px;">
 <?php echo $status; ?>
 </div>
-<?php
-if(!empty($_SESSION["shopping_cart"])) {
-$cart_count = count(array_keys($_SESSION["shopping_cart"]));
-?>
-<div class="cart_div mb-4 text-right">
-<a href="cart.php">
- <strong >Cart</strong> 
-<span ><small class="  bg-danger text-light px-2 py-1 font-weight-bold rounded-circle"><?php echo $cart_count; ?></small></span></a>
-</div>
-<?php
-}
-?>
+
 
 <div class="cart">
 <?php
+
 if(isset($_SESSION["shopping_cart"])){
-    $total_price = 0;
+  
+	# code...
+
 ?>	
 <table class="table">
 <tbody>
 <tr>
-<td>DESCRIPTION</td>
 <td>ITEM NAME</td>
+<td>CATEGORY</td>
+<td>DESCRIPTION</td>
+
 <td>QUANTITY</td>
 <td>UNIT PRICE</td>
 <td>ITEMS TOTAL</td>
 </tr>	
 <?php		
-foreach ($_SESSION["shopping_cart"] as $product){
+foreach ($items as $product){
+	$total_price = 0;
+	$p_id=$product["p_id"];
+$res = mysqli_query($con,"SELECT * FROM `product_list` WHERE `p_id`='$p_id'");
+$a=0;
+while ($row = mysqli_fetch_assoc($res)) {$a++;
+	// echo var_dump($row);
 ?>
 <tr>
-
-<td ><?php echo $product['desc']?></td>	
-<td ><?php echo $product['product_name']?>
-<form method='post' action=''>
-<input type='hidden' name='product_name' value="<?php echo $product["product_name"]; ?>" />
-<input type='hidden' name='action' value="remove" />
-<button type='submit' class='remove btn btn-danger'>Remove</button>
-</form>
-
-</td>	
+	<td ><img src='uploads/<?php echo $row["product_img"]; ?>' width="50" height="40" style="object-fit:contain ;" />
+	<?php echo $row['product_name']?>
+<a style="
+    padding-left: 18px;
+" href="cart.php?action=delete&id=<?php echo $product["p_id"]; ?>"><span class="text-danger">Remove</span></a></td>
+<td ><?php echo $row['category']?></td>	
+<td ><?php echo $row['desc']?></td>	
+	
 
 <td>
 <form method='post' action=''>
-<input type='hidden' name='product_name' value="<?php echo $product["product_name"]; ?>" />
+<input type='hidden' name='p_id' value="<?php echo $product["p_id"]; ?>" />
 <input type='hidden' name='action' value="change" />
 <select name='quantity' class='quantity' onchange="this.form.submit()">
 <option <?php if($product["quantity"]==1) echo "selected";?> value="1">1</option>
@@ -97,21 +134,43 @@ foreach ($_SESSION["shopping_cart"] as $product){
 </select>
 </form>
 </td>
-<td><?php echo "$".$product["price"]; ?></td>
-<td><?php echo "$".$product["price"]*$product["quantity"]; ?></td>
+<td><?php echo "$".$row['price']; ?></td>
+<td><?php echo "$".$row["price"]*$product["quantity"]; ?></td>
 </tr>
 <?php
-$total_price += ($product["price"]*$product["quantity"]);
-}
+$total_price += ($row["price"]*$product["quantity"]);
+}}
 ?>
-<tr>
-<td colspan="5" align="right">
+<tr >
+<td colspan="7"  align="left">
 <strong>TOTAL: <?php echo "$".$total_price; ?></strong>
 </td>
 </tr>
-</tbody>
-</table>		
+<tr>
+<td colspan="7" align="right">
+<a class="btn btn-dark" href="show_products.php">Buy More Products</a></td></tr>
+<td colspan="7" align="right">
+	<?php 
+
+	if (isset($_SESSION['ADMIN_LOGIN']) && $_SESSION['ADMIN_LOGIN']!='' ) {
+		?><form method='post' action='checkout.php'>
+		<button type='checkout' value="checkout" class=' btn btn-dark'>Checkout</button>
+		</form>
+		</td>
+	</tbody>
+	</table>
+		<?php
+	} else {
+		echo '<a href="login.php">Login</a> to complete your purchase';
+	}
+	
+	
+	?>
+	
+
+		
   <?php
+
 }else{
 	echo "<h4>Your cart is empty!</h4>";
 	}
